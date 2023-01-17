@@ -7,3 +7,5 @@ recordings/
 data/
 .png
 __pycache__/
+*.png
+*.wav
