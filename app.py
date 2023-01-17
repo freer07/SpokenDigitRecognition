@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, send_file
 from wav2spec import wav2spec
 from AlexNetSpec import AlexNetSpec as ANS 
 import tensorflow as tf
@@ -14,8 +14,9 @@ def pipline(name, directory):
     filename = arr[len(arr)-1]
     model = keras.models.load_model("model")
 
+    imgName = directory + "\\" + filename + ".png"
     img = tf.keras.utils.load_img(
-       directory + "\\" + filename + ".png", target_size=(ANS.HEIGHT, ANS.WIDTH)
+       imgName, target_size=(ANS.HEIGHT, ANS.WIDTH)
     )
     img_array = tf.keras.utils.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0) # Create a batch
@@ -23,7 +24,9 @@ def pipline(name, directory):
     predictions = model.predict(img_array)
     score = tf.nn.softmax(predictions[0])
 
-    return "This image most likely belongs to {} with a {:.2f} percent confidence.".format([int(x) for x in range(10)][np.argmax(score)], 100 * np.max(score))
+    respone = send_file(imgName)
+    respone.headers["message"] = "This image most likely belongs to {} with a {:.2f} percent confidence.".format([int(x) for x in range(10)][np.argmax(score)], 100 * np.max(score))
+    return respone
 
 @app.route("/", methods=['POST'])
 def upload():
@@ -32,5 +35,5 @@ def upload():
     filename = directory+"\\uploaded_file.wav"
     assert(f.content_type == "audio/wave")
     f.save(filename)
-
+    
     return pipline(filename, directory)
