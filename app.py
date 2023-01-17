@@ -25,13 +25,14 @@ def pipline(name):
 
     respone = send_file(imgName)
     respone.headers["message"] = "This image most likely belongs to {} with a {:.2f} percent confidence.".format([int(x) for x in range(10)][np.argmax(score)], 100 * np.max(score))
+    respone.headers["Access-Control-Allow-Origin"] = "*"
     return respone
 
 @app.route("/", methods=['POST'])
 def upload():
     f = request.files['wav_file']
     filename = "uploaded_file.wav"
-    assert(f.content_type == "audio/wave")
+    #assert(f.content_type == "audio/wave")
     f.save(filename)
     
     return pipline(filename)
