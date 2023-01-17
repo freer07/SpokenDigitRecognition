@@ -32,9 +32,12 @@ def wav2spec(outputFolder, name, samplerate=0, data=[], loadWav=True):
     arr = name.split('.')
     arr2 = arr[0].split('\\')
     filename = arr2[len(arr2)-1]
-    if not os.path.exists(outputFolder):
-        os.makedirs(outputFolder)
-    figure.savefig(outputFolder + '\\' + filename + ".png", bbox_inches="tight", pad_inches = 0)
+    if outputFolder != "":
+        if not os.path.exists(outputFolder):
+            os.makedirs(outputFolder)
+        figure.savefig(outputFolder + '\\' + filename + ".png", bbox_inches="tight", pad_inches = 0)
+    else:
+        figure.savefig(filename + ".png", bbox_inches="tight", pad_inches = 0)
     plt.close(figure)
    
 def main():

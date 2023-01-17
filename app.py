@@ -7,14 +7,13 @@ import numpy as np
 
 app = Flask(__name__)
 
-def pipline(name, directory):
-    wav2spec(directory, name)
+def pipline(name):
+    wav2spec("", name)
     arr = name.split('.')
-    arr = arr[0].split('\\')
-    filename = arr[len(arr)-1]
+    filename = arr[0]
     model = keras.models.load_model("model")
 
-    imgName = directory + "\\" + filename + ".png"
+    imgName = filename + ".png"
     img = tf.keras.utils.load_img(
        imgName, target_size=(ANS.HEIGHT, ANS.WIDTH)
     )
@@ -31,9 +30,8 @@ def pipline(name, directory):
 @app.route("/", methods=['POST'])
 def upload():
     f = request.files['wav_file']
-    directory = "testdata"
-    filename = directory+"\\uploaded_file.wav"
+    filename = "uploaded_file.wav"
     assert(f.content_type == "audio/wave")
     f.save(filename)
     
-    return pipline(filename, directory)
+    return pipline(filename)
