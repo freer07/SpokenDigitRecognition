@@ -9,3 +9,8 @@ data/
 __pycache__/
 *.png
 *.wav
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

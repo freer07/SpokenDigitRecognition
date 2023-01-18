@@ -23,10 +23,11 @@ def pipline(name):
     predictions = model.predict(img_array)
     score = tf.nn.softmax(predictions[0])
 
-    respone = send_file(imgName)
-    respone.headers["message"] = "This image most likely belongs to {} with a {:.2f} percent confidence.".format([int(x) for x in range(10)][np.argmax(score)], 100 * np.max(score))
-    respone.headers["Access-Control-Allow-Origin"] = "*"
-    return respone
+    response = send_file(imgName)
+    response.headers["message"] = "This image most likely belongs to {} with a {:.2f} percent confidence.".format([int(x) for x in range(10)][np.argmax(score)], 100 * np.max(score))
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Expose-Headers"] = "*"
+    return response
 
 @app.route("/", methods=['POST'])
 def upload():
