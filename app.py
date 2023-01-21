@@ -4,8 +4,9 @@ from AlexNetSpec import AlexNetSpec as ANS
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
+import os
+from werkzeug.middleware.proxy_fix import ProxyFix
 
-app = Flask(__name__)
 
 def pipline(name):
     wav2spec("", name)
@@ -29,11 +30,44 @@ def pipline(name):
     response.headers["Access-Control-Expose-Headers"] = "*"
     return response
 
-@app.route("/", methods=['POST'])
-def upload():
-    f = request.files['wav_file']
-    filename = "uploaded_file.wav"
-    #assert(f.content_type == "audio/wave")
-    f.save(filename)
+
+def create_app(test_config=None):
+    # create and configure the app
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+        #DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+    )
+    # Tell flask it is behind proxy
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
+
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile('config.py', silent=True)
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
+
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
+    # a simple page that says hello
+    @app.route('/hello')
+    def hello():
+        return 'Hello, World!'
     
-    return pipline(filename)
+    @app.route("/", methods=['POST'])
+    def upload():
+        f = request.files['wav_file']
+        filename = "uploaded_file.wav"
+        #assert(f.content_type == "audio/wave")
+        f.save(filename)
+        
+        return pipline(filename)
+
+    return app
